@@ -1,6 +1,5 @@
 # touch_lamp
 
-Here is a clean, scannable markdown summary of the advice for your ESP32-H2 capacitive touch lamp project. You can copy and paste this straight into your project notes or documentation.
 ------------------------------
 ## 💡 DIY Capacitive Touch Lamp Project Notes## 🛠️ Touch Pad & Wire Assembly (Soda Cans)
 
@@ -36,5 +35,31 @@ Here is a clean, scannable markdown summary of the advice for your ESP32-H2 capa
 * Software Debounce: In your ESP32 code, implement a strict lockout timer. When a touch is registered and the relay switches state, program the ESP32 to completely ignore the TTP223 input pin for 500ms to 1000ms to let any residual electrical noise settle.
 
 ------------------------------
-Before you start wiring the mains voltage side, let me know what type of light bulb you plan to use and how you plan to splice the AC wires, so we can ensure the layout is perfectly safe!
 
+Here is the additional markdown summary for your project notes, specifically tailored to adding the dimming functionality safely with your ESP32-H2. You can append this directly to the bottom of your previous summary.
+------------------------------
+## 💡 Phase 2 Upgrade: Multi-Level Dimming Functionality## 1. Hardware Shift (Ditch the Standard Relay)
+
+* No Standard SSRs: Standard Solid State Relays (like the Omron G3MB-202P) cannot dim AC loads. Attempting to use them with PWM will cause the LED globe to strobe or buzz violently.
+* Use a TRIAC Dimmer Module: Buy an isolated AC Dimmer Module (often branded as RobotDyn or TRIAC Dimmer Module) designed for microcontrollers.
+* How it Works: The module reads the 240V AC sine wave and uses a Zero-Cross (ZC) pin to tell the ESP32 exactly when the wave crosses 0 Volts. The ESP32 then pulses the GATE/PWM pin to cleanly "cut" the AC wave, altering the power delivered to the LED globe.
+
+## 2. Dimmer Module Wiring to ESP32-H2
+
+* VCC: Connect to the ESP32 3.3V pin to ensure all logic lines match the H2's voltage tolerances.
+* GND: Connect to ESP32 GND.
+* ZC (Zero-Cross): Connect to an interrupt-capable digital GPIO pin on the ESP32-H2. Your code will monitor this pin to time the AC dimming cycle.
+* GATE / PWM: Connect to a separate digital GPIO pin on the ESP32-H2. The code will toggle this pin to trigger the dimming action.
+
+## 3. USB Cable Management Inside the Base
+
+* Do Not Shorten: USB cables contain fragile shielded wires that are highly problematic to splice cleanly. Leave the cable intact.
+* The "Figure-8" Loop Method: Bundle any excess USB cable length in a tight Figure-8 pattern (or zig-zag accordion fold) rather than a uniform circle. Secure the middle with a cable tie. This structural geometry forces the magnetic fields to cancel each other out, preventing the coiled cable from acting as an inductor antenna that causes false touch triggers.
+
+## 4. 240V AC Mains Splicing & Physical Safety
+
+* No Electrical Tape Splices: Under no circumstances should you twist 240V mains wires together and wrap them in tape inside the 3D-printed base.
+* Use WAGO 221 Lever Connectors: Use genuine WAGO 221 lever-nuts to splice the incoming active, neutral, and earth lines safely. They provide a secure, enclosed mechanical connection.
+* Mechanical Strain Relief: Design or install a physical cable clamp where the mains power cord enters the 3D-printed enclosure. If the cord is yanked externally, the mechanical tension must pull against the plastic housing, never against the internal screw terminals of the dimmer module.
+
+------------------------------
